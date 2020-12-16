@@ -6,6 +6,7 @@ use App\Entity\Store;
 use App\Repository\UserRepository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,10 +17,11 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class StoreRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private $manager;
+    public function __construct(ManagerRegistry $registry,EntityManagerInterface $manager)
     {
         parent::__construct($registry, Store::class);
-    }
+        $this->manager=$manager;    }
 
     // /**
     //  * @return Store[] Returns an array of Store objects
@@ -54,8 +56,8 @@ class StoreRepository extends ServiceEntityRepository
     public function saveStore($Owner,$name)
     {
         $newstore = new Store();
-        $user = new User().
-            $user=UserRepository::find($Owner);
+        $user = $Owner;
+
 
         $newstore
             ->setOwner($user)

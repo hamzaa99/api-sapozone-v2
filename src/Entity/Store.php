@@ -30,7 +30,7 @@ class Store
     private $name;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $street_name;
 
@@ -312,7 +312,7 @@ class Store
 
     public function toArray() : Array{
         return [
-            'name'=>$this.$this->getName()
+            'name'=>$this->getName()
 
         ];
     }

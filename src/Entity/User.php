@@ -163,7 +163,7 @@ class User
                 'city' =>$this->getCity(),
             ],
             'phone_number'=>$this->getPhoneNumber(),
-            'store' =>$this->getStore()->toArray()
+
 
         ];
     }

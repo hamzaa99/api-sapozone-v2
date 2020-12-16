@@ -48,7 +48,7 @@ class UserController extends AbstractController
 
         $email = $data['email'];
         $username = $data['username'];
-        $password = $data['password'];
+        $password =password_hash($data['password'],PASSWORD_BCRYPT);
 
 
         if (empty($username) || empty($password)|| empty($email)) {
@@ -66,25 +66,42 @@ class UserController extends AbstractController
      */
     public function getOneUser($id):JsonResponse
     {
-        if(
-        $user = $this->userRepository->findOneBy(['id' => $id]))
-        {
+        $user = $this->userRepository->findOneBy(['id' => $id]);
 
-        $data[] = [
-            'id' => $user->getId(),
-            'firstName' => $user->getFirstame(),
-            'lastName' => $user->getName(),
-            'email' => $user->getEmail(),
-            'phoneNumber' => $user->getPhoneNumber(),
-            'username' => $user->getUsername(),
-            'city' => $user->getCity(),
-        ];
+        if (empty($user))
+            return new JsonResponse(['Error' => 'this user doesnt exist!'], Response::HTTP_OK);
+        $data[] = $user->toArray();
         if (empty($data))
           return new JsonResponse(['Error' => 'this user doesnt exist!'], Response::HTTP_OK);
 
      return new JsonResponse($data, Response::HTTP_OK);}
-          else return new JsonResponse(['status' => 'merde'], Response::HTTP_OK);
+
+    /**
+     * @Route("/sign_in/", name="signin", methods={"POST"})
+     */
+    public function signin(Request $request):JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $email = $data['email'];
+        $username = $data['username'];
+        $password = $data['password'];
+
+
+        if ((empty($username) && empty($email)) || empty($password)) {
+            return new JsonResponse(['Error' => 'expecting mandatory parameters'], Response::HTTP_CREATED);
+        }
+
+        $user=$this->userRepository->findOneBy(['username' => $username]);
+        $data=$user->toArray();
+
+        if(password_hash($password,PASSWORD_BCRYPT)==$user->getPassword())
+        return new JsonResponse($data, Response::HTTP_CREATED);
+        else return new JsonResponse(['Error' => 'wrong password'], Response::HTTP_CREATED);
     }
+
+
+
     /**
      * @Route("/users", name="getall", methods={"GET"})
      */
@@ -96,7 +113,7 @@ class UserController extends AbstractController
         foreach ($users as $users) {
             $data[] = [
                 'id' => $users->getId(),
-                'firstName' => $users->getFirstame(),
+                'firstName' => $users->getFirstname(),
                 'lastName' => $users->getName(),
                 'email' => $users->getEmail(),
                 'phoneNumber' => $users->getPhoneNumber(),
@@ -121,14 +138,15 @@ class UserController extends AbstractController
 
         empty($data['username']) ? true : $user->setUsername($data['username']);
         empty($data['password']) ? true : $user->setPassword($data['password']);
-        empty($data['name']) ? true : $user->setPassword($data['password']);
-        empty($data['firstname']) ? true : $user->setPassword($data['streetname']);
-        empty($data['email']) ? true : $user->setPassword($data['email']);
-        empty($data['streetname']) ? true : $user->setPassword($data['streetname']);
-        empty($data['street_number']) ? true : $user->setPassword($data['street_number']);
-        empty($data['postal_code']) ? true : $user->setPassword($data['postal_code']);
-        empty($data['city']) ? true : $user->setPassword($data['bio']);
-        empty($data['phone_number']) ? true : $user->setPassword($data['phone_number']);
+        empty($data['lastname']) ? true : $user->setName($data['name']);
+        empty($data['firstname']) ? true : $user->setFirstname($data['firstname']);
+        empty($data['email']) ? true : $user->setEmail($data['email']);
+        empty($data['streetname']) ? true : $user->setStreetname($data['streetname']);
+        empty($data['street_number']) ? true : $user->setStreetNumber($data['street_number']);
+        empty($data['postal_code']) ? true : $user->setPostalCode($data['postal_code']);
+        empty($data['city']) ? true : $user->setCity($data['city']);
+        empty($data['phone_number']) ? true : $user->setPhoneNumber($data['phone_number']);
+        empty($data['bio']) ? true : $user->setBio($data['bio']);
 
         $updatedUser = $this->userRepository->updateUser($user);
 

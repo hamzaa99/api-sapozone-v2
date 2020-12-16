@@ -19,33 +19,36 @@ class StoreController extends AbstractController
 {
 
     private $storeRepository;
-    public function __construct(StoreRepository $storeRepository)
+    private $userRepository;
+    public function __construct(StoreRepository $storeRepository,UserRepository $userRepository)
     {
         $this->storeRepository = $storeRepository;
+        $this->userRepository = $userRepository;
     }
 
 
 
 
-
     /**
-     * @Route("/stores/", name="add", methods={"POST"})
+     * @Route("/stores/", name="add_store", methods={"POST"})
      * @param Request $request
      * @return JsonResponse
      */
-    public function add(Request $request): JsonResponse
+    public function add_store(Request $request): JsonResponse
     {
 
         $data = json_decode($request->getContent(), true);
 
-        $owner = $data['owner'];
+        $ownerid = $data['owner'];
         $name = $data['name'];
 
+
+
+        $owner= $this->userRepository->find($ownerid);
 
         if (empty($name) || empty($owner)) {
             throw new NotFoundHttpException('Expecting mandatory parameters!');
         }
-
         $this->storeRepository->saveStore($owner,$name);
         return new JsonResponse(['status' => 'Store created!'], Response::HTTP_CREATED);
     }
@@ -84,32 +87,32 @@ class StoreController extends AbstractController
     {
         $stores = $this->storeRepository->findAll();
 
-        $data = ['test'=> 'stores'];
 
-      /*  foreach ($stores as $store) {
+
+        foreach ($stores as $store) {
             $data[] = [
-                $store->toArray()
+                "name" => $store->getName()
             ];
-        }*/
+        }
 
 
         return new JsonResponse($data, Response::HTTP_OK);
     }
     /**
-     * @Route("/stores/{id}", name="update_customer", methods={"PUT"})
+     * @Route("/stores/{id}", name="update_store", methods={"PUT"})
      */
     public function updateStore($id, Request $request): JsonResponse
     {
         $store = $this->storeRepository->findOneBy(['id' => $id]);
         $data = json_decode($request->getContent(), true);
 
-        empty($data['name']) ? true : $store->setstorename($data['name']);
-        empty($data['streetname']) ? true : $store->setPassword($data['streetname']);
-        empty($data['street_number']) ? true : $store->setPassword($data['street_number']);
-        empty($data['city']) ? true : $store->setPassword($data['city']);
-        empty($data['bio']) ? true : $store->setPassword($data['bio']);
-        empty($data['phone_number']) ? true : $store->setPassword($data['phone_number']);
-        empty($data['postal_code']) ? true : $store->setPassword($data['postal_code']);
+        empty($data['name']) ? true : $store->setName($data['name']);
+        empty($data['streetname']) ? true : $store->setStreetName($data['streetname']);
+        empty($data['street_number']) ? true : $store->setStreetNUMBER($data['street_number']);
+        empty($data['city']) ? true : $store->setCity($data['city']);
+        empty($data['bio']) ? true : $store->setBio($data['bio']);
+        empty($data['phone_number']) ? true : $store->setPhoneNumber($data['phone_number']);
+        empty($data['postal_code']) ? true : $store->setPostalCode($data['postal_code']);
 
         $updatedstore = $this->storeRepository->updatestore($store);
 
